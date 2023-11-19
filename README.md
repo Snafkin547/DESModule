@@ -111,3 +111,11 @@ print(f"\ninput value     :{input_val}")
 print(f"decrypted value :{rfinal_val}")
 assert rfinal_val == input_val
 ```
+
+## Code Formatting Standards
+My project uses Black, a Python code formatter, to ensure uniform formatting across our codebase. 
+Contributors are required to format their code using black . in the root directory before pushing to the repository. 
+
+Additionally, we employ a GitHub Action that automatically checks for compliance with Black's formatting standards on each pull request. 
+This check can prevent merging if the code does not meet the required standards. 
+It's crucial to remember to run Black before pushing changes, as this not only keeps the code clean and readable but also facilitates the review and merging process by adhering to our automated checks.
