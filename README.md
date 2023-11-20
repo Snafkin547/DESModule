@@ -18,49 +18,50 @@ cd Cryptography/des_module
 DES in the des.py file is the main body of the algorithm. You may instantiate it and call the '.encrypt' method:
 
 ```
-DES_inst = DES()
-enc_val, enc_bits = DES_inst.encrypt(input_bits, key_bits)
+DES_inst = DES(key)
+enc_val, enc_bits = DES_inst.encrypt(input_bits)
 ```
 
-DES encryption method needs 'input_bits' and 'key_bits' as arguments.<br>
-The input_bit and bit_key are required to be 64 bits and 56 bits long respectively in a bit-list format like: [0, 1, 0 ... 1]
+DES encryption method needs 'input_bits' as arguments.<br>
+The input_bit is required to be 64 bits in a bit-list format like: [0, 1, 0 ... 1]
 
 You may create your own or can use a method in utils.
 
 ```
-input_bits = generate_bit(56)
-key_bits = generate_bit(56)
+input_bits = generate_bit(64)
 ```
 
 Putting this all together, you can craft your encryption algorithm like this:
 (The last line of assertion proves the symmetric nature of this algorithm)
 
 ```
-from utils import *
-from tables import *
-from des import DES
+from src import *
 
-# Generate 56bits key and expand
-orig_key_size = 64
-key, key_bits = generate_bit(orig_key_size)
-print(f'\nkey value       :{key}')
+key = 8289481480542705629
 
 # Generate 64 bits input
-input_size = 64
-input_val, input_bits = generate_bit(input_size)
+input_val = 3271167758276528483
+input_bits = [0, 0, 1, 0, 1, 1, 0, 1, 
+          0, 1, 1, 0, 0, 1, 0, 1, 
+          1, 0, 0, 0, 0, 1, 0, 1, 
+          1, 0, 1, 1, 1, 1, 1, 0, 
+          1, 0, 1, 0, 1, 0, 0, 0, 
+          1, 1, 0, 0, 1, 0, 0, 0, 
+          1, 0, 0, 0, 1, 0, 0, 1, 
+          0, 1, 1, 0, 0, 0, 1, 1]
 
-# Initiate DEC
-DES_inst = DES()
+# Initiate DES
+DES_inst = DES(key)
 
-# DEs encryption
-enc_val, enc_bits = DES_inst.encrypt(input_bits, key_bits)
+
+# DES encryption
+enc_val, enc_bits = DES_inst.encrypt(input_bits)
 assert len(enc_bits) == 64
 print(f"\nencrypted value :{enc_val}")
 
-# DEs decryption
-dec_val, dec_bits = DES_inst.decrypt(enc_bits, key_bits)
 
-# Result and proof of symmetricity
+# DES decryption
+dec_val, dec_bits = DES_inst.decrypt(enc_bits)
 print(f"\ninput value     :{input_val}")
 print(f"decrypted value :{dec_val}")
 assert input_val == dec_val
@@ -78,38 +79,28 @@ This advanced version has gained approval from the National Institute of Standar
 The following is the example code to demonstrate triple-DES algorithm:
 
 ```
-from utils import *
-from tables import *
-from des import DES
-
+from src import *
 
 # Generate 64 bits input
 input_size = 64
 input_val, input_bits = generate_bit(input_size)
 
 # Generate 64 bits input
-orig_key_size = 64
-key0, key_bits0 = generate_bit(orig_key_size)
-key1, key_bits1 = generate_bit(orig_key_size)
-key2, key_bits2 = generate_bit(orig_key_size)
+keys = [8289481480542705629, 8289481480542225629, 9128814805426305629]
 
-# Initiate DEC
-DES_inst = DES()
+# Initiate DES
+DES_inst = triple_DES(keys)
 
 # Triple-DES encryption
-enc_val, enc_bits = DES_inst.encrypt(input_bits, key_bits0)
-dec_val, dec_bits = DES_inst.decrypt(enc_bits, key_bits1)
-final_val, final_bits = DES_inst.encrypt(dec_bits, key_bits2)
+enc_val, enc_bits = DES_inst.encrypt(input_bits)
 
 # Triple-DES decryption
-rdec_val, rdec_bits = DES_inst.decrypt(final_bits, key_bits2)
-renc_val, renc_bits = DES_inst.encrypt(rdec_bits, key_bits1)
-rfinal_val, rfinal_bits = DES_inst.decrypt(renc_bits, key_bits0)
+final_val, final_bits = DES_inst.decrypt(enc_bits)
 
 # Result and proof of symmetricity
 print(f"\ninput value     :{input_val}")
-print(f"decrypted value :{rfinal_val}")
-assert rfinal_val == input_val
+print(f"decrypted value :{final_val}")
+assert final_val == input_val
 ```
 
 ## Code Formatting Standards
