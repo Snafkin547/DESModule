@@ -1,15 +1,14 @@
 from src import *
 
-# Generate 64bits key and expand
-orig_key_size = 64
-# key, key_bits = generate_bit(orig_key_size)
+
 key = 8289481480542705629
-# fmt: off
 
 # Generate 64 bits input
 input_size = 64
 # input_val, input_bits = generate_bit(input_size)
 input_val = 3271167758276528483
+
+# fmt: off
 input_bits = [0, 0, 1, 0, 1, 1, 0, 1, 
           0, 1, 1, 0, 0, 1, 0, 1, 
           1, 0, 0, 0, 0, 1, 0, 1, 

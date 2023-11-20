@@ -28,7 +28,7 @@ jobs:
           black --check .
       - name: Run des module
         run: |
-          python des_demo.py
+          python demo_des.py
       - name: Run triple-des module
         run: |
-          python 3des_demo.py
+          python demo_3des.py
