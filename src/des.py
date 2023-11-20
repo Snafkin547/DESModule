@@ -1,26 +1,52 @@
-from tables import *
-from utils import *
+from .tables import *
+from .utils import *
 
 
 # ref: https://csrc.nist.gov/files/pubs/fips/46-3/final/docs/fips46-3.pdf
 class DES:
-    def __init__(self):
-        self.key_schedule = None
+    def __init__(self, key):
+        key = [int(x) for x in bin(key)[2:]]
+        in_keysize = 56
+        if len(key) > in_keysize:
+            key = key[:in_keysize]
+        elif len(key) < in_keysize:
+            key = [0 for _ in range(in_keysize - len(key))] + key
+        assert len(key) == in_keysize
 
-    # Key expansion from 64 bits key to n_keys sets of 48 bits key
-    def key_expansion(self, key_bits):
+        self.key_schedule = self.key_expansion(key)
+
+    def from_56_to_64(self, bit_key):
+        assert len(bit_key) == 56
+        curr_bit = 0
+        res_key = []
+        for i, b in enumerate(bit_key):
+            curr_bit ^= b
+            res_key.append(b)
+
+            if (i + 1) % 7 == 0:
+                curr_bit ^= 1
+                res_key.append(curr_bit)
+                curr_bit = 0
+        assert len(res_key) == 64
+        return res_key
+
+    # Key expansion from 56 bits key to n_keys sets of 48 bits key
+    def key_expansion(self, bit_key):
+        # Expand 56 bits key to 64 bits key every 8th bits is of odd parity of preceding 7 bits
+        bit_key = self.from_56_to_64(bit_key)
+
         try:
             # Replace 'key_bits' with your actual key bits list variable
-            assert len(key_bits) == 64, "Key must be 64 bits long"
-            assert all(elem in [0, 1] for elem in key_bits), "All elements must be 0 or 1"
+            assert len(bit_key) == 64, "Key must be 64 bits long"
+            assert all(elem in [0, 1] for elem in bit_key), "All elements must be 0 or 1"
         except AssertionError as error:
             raise ValueError(str(error))
 
         res = []
 
         # Permuted choice 1
-        c_key = [key_bits[x - 1] for x in pc_1_c]
-        d_key = [key_bits[x - 1] for x in pc_1_d]
+        c_key = [bit_key[x - 1] for x in pc_1_c]
+        d_key = [bit_key[x - 1] for x in pc_1_d]
 
         for i in range(16):
             curr_shift = left_shift_schedule[i + 1]
@@ -94,20 +120,14 @@ class DES:
 
         return input_bits
 
-    def encrypt(self, input_bits, key_bits):
-        try:
-            assert len(key_bits) == 64, "Key must be 64 bits long"
-            assert all(elem in [0, 1] for elem in key_bits), "All elements in key_bits must be 0 or 1"
-        except AssertionError as error:
-            raise ValueError(str(error))
+    def encrypt(self, input_bits):
 
         try:
             assert len(input_bits) == 64, "input_bits must be 64 bits long"
             assert all(elem in [0, 1] for elem in input_bits), "All elements in input_bits must be 0 or 1"
         except AssertionError as error:
             raise ValueError(str(error))
-
-        self.key_schedule = self.key_expansion(key_bits)
+        
         # Initial Permutation of input
         enc_list = self.permutate(input_bits, init_perm_table)
 
@@ -119,12 +139,7 @@ class DES:
 
         return list_to_binary(enc_list), enc_list
 
-    def decrypt(self, enc_bits, key_bits):
-        try:
-            assert len(key_bits) == 64, "Key must be 64 bits long"
-            assert all(elem in [0, 1] for elem in key_bits), "All elements in key_bits must be 0 or 1"
-        except AssertionError as error:
-            raise ValueError(str(error))
+    def decrypt(self, enc_bits):
 
         try:
             assert len(enc_bits) == 64, "enc_bits must be 64 bits long"
@@ -132,7 +147,6 @@ class DES:
         except AssertionError as error:
             raise ValueError(str(error))
 
-        self.key_schedule = self.key_expansion(key_bits)
         # Initial Permutation of input
         dec_list = self.permutate(enc_bits, init_perm_table)
 
